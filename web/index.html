@@ -17,7 +17,7 @@
 <details open><summary>What does confidence mean?</summary><p class="muted">The score is the model's softmax output, not a guarantee. Unfamiliar symbols, blank inputs or unusual handwriting may still receive a confident wrong label.</p></details></section></div>
 <section class="panel full"><h2>3. Visual explanation · nearest training examples</h2><p class="muted">The five closest DINOv2 representations by cosine similarity. Labels belong to real training images. This is evidence of visual similarity, not a causal explanation of either classifier.</p><div id="gallery" class="gallery"><span class="muted">Recognize a digit to explore its neighbors.</span></div></section>
 <section class="panel full"><h2>Measured experiment results</h2><div class="tablewrap"><table><thead><tr><th>Model</th><th>Test accuracy</th><th>Macro F1</th><th>Mean inference</th></tr></thead><tbody id="metrics"></tbody></table></div><p class="muted">Same saved A1 split: 800 train / 100 validation / 100 test. New CNN runs use PyTorch; original A1 results were 90% and 98% in TensorFlow. DINOv2 head selection uses validation loss, not test accuracy. Latencies: 30 single-image runs after 5 warm-ups.</p></section>
-</main><footer>Educational demonstration · One digit per image · No live retraining · DINOv2 by Meta AI / FAIR</footer>
+</main><footer>Educational demonstration · One digit per image · No live retraining · DINOv2 by Meta AI / FAIR<div id="runtimeSummary" aria-live="polite"></div></footer>
 <script>
 const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d');let drawing=false,blob=null,previewUrl=null;
 function clearCanvas(){ctx.fillStyle='white';ctx.fillRect(0,0,224,224);ctx.strokeStyle='#111';ctx.lineWidth=13;ctx.lineCap='round';ctx.lineJoin='round'}clearCanvas();
@@ -53,6 +53,13 @@ $('latency').textContent=d.inference_ms.toFixed(1)+' ms';$('average').textConten
 $('gallery').replaceChildren();d.neighbors.forEach(n=>{const el=document.createElement('div');el.className='neighbor';el.innerHTML='<img alt="Training digit '+n.label+'"><span>Label '+n.label+'</span><span class="muted">cosine '+n.similarity.toFixed(3)+'</span>';el.querySelector('img').src=n.image;$('gallery').append(el)});status('Prediction complete. Compare the input with its nearest neighbors.');
 }catch(e){status(e.message,true)}finally{btn.disabled=false}};
 const names={cnn_baseline:'Baseline CNN · rerun',cnn_improved:'Improved CNN · rerun',dino_noaug:'DINOv2 · no augmentation',dino_aug:'DINOv2 · with augmentation'};
-async function init(){try{const info=await(await fetch('/api/info')).json();Object.entries(info.metrics).forEach(([key,m])=>{const tr=document.createElement('tr');[names[key]+(key===info.selected?' ✓ selected':''),(m.accuracy*100).toFixed(1)+'%',m.macro_f1.toFixed(4),info.latency[key].mean_ms.toFixed(1)+' ms'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});$('metrics').append(tr)});
+function showRuntimeSummary(environment){
+const ua=navigator.userAgent;
+const system=/Android/i.test(ua)?'Android':/iPhone|iPad|iPod/i.test(ua)?'iOS':/Windows/i.test(ua)?'Windows':/Macintosh|Mac OS X/i.test(ua)?'macOS':/Linux/i.test(ua)?'Linux':'Unknown';
+const browser=/Edg(?:e|A|iOS)?\//.test(ua)?'Edge':/OPR\/|Opera/.test(ua)?'Opera':/Firefox\/|FxiOS\//.test(ua)?'Firefox':/Chrome\/|CriOS\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Unknown';
+const device=String(environment?.device||'Unknown').toUpperCase();
+$('runtimeSummary').textContent=`Device: ${system} · Compute: ${device} · Browser: ${browser}`;
+}
+async function init(){try{const info=await(await fetch('/api/info')).json();showRuntimeSummary(info.environment);Object.entries(info.metrics).forEach(([key,m])=>{const tr=document.createElement('tr');[names[key]+(key===info.selected?' ✓ selected':''),(m.accuracy*100).toFixed(1)+'%',m.macro_f1.toFixed(4),info.latency[key].mean_ms.toFixed(1)+' ms'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.append(td)});$('metrics').append(tr)});
 const examples=await(await fetch('/api/examples')).json();for(const ex of examples){const btn=document.createElement('button');btn.title='Test example '+ex.label;btn.setAttribute('aria-label',btn.title);const img=document.createElement('img');img.src=ex.image;img.alt=ex.label;btn.append(img);btn.onclick=async()=>{showBlob(await(await fetch(ex.image)).blob());$('mode').value='processed';status('Test example '+ex.label+' loaded. Click Recognize digit.');};$('examples').append(btn)}}catch(e){status('Could not load experiment artifacts. Run training first.',true)}}init();
 </script></body></html>

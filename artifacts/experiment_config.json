@@ -1,0 +1,21 @@
+{
+  "augmentation": {
+    "method": "affine image transformations, not generative AI",
+    "rotation_degrees": 10,
+    "translation_pixels": 2,
+    "zoom_fraction": 0.08,
+    "copies_per_training_original": 2,
+    "generated_train_images": 1600,
+    "validation_test_augmentation": false
+  },
+  "head": {
+    "epochs_max": 200,
+    "patience": 20,
+    "optimizer": "AdamW",
+    "learning_rate": 0.01,
+    "weight_decay": 0.01,
+    "batch": "full"
+  },
+  "synthetic_generator_share": 0,
+  "selected": "dino_aug"
+}

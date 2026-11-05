@@ -1,0 +1,14 @@
+100 картинок MNIST: по 10 для каждой цифры, папки 0–9.
+
+В приложении нажми «Выберите файл», выбери PNG из нужной папки.
+Подготовка изображения выбирается автоматически.
+Затем нажми Recognize digit. Название папки — правильная цифра.
+
+Это дополнительные демонстрационные изображения, не часть обучения или результатов отчёта. Точные совпадения с существующими A1 train/val/test исключены; независимость авторов почерка не проверена.
+
+Source: MNIST by Yann LeCun, Corinna Cortes and Christopher J. C. Burges.
+https://www.tensorflow.org/datasets/catalog/mnist
+Original: http://yann.lecun.com/exdb/mnist/
+Downloaded from: https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
+Source indexes and hashes are recorded in source.json. Pixels unchanged; converted to PNG.
+

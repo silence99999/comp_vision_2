@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "checks": [
+    "home route",
+    "experiment info",
+    "10 test examples",
+    "six predictions agree with offline evaluation",
+    "five nearest neighbors",
+    "positive latency",
+    "white and black blank photo rejection",
+    "invalid image rejection",
+    "missing file rejection",
+    "processed mode preserves pixels"
+  ],
+  "predictions": [
+    {
+      "index": 0,
+      "model": "dino",
+      "digit": 0,
+      "matches_saved_probabilities": true
+    },
+    {
+      "index": 0,
+      "model": "baseline",
+      "digit": 0,
+      "matches_saved_probabilities": true
+    },
+    {
+      "index": 49,
+      "model": "dino",
+      "digit": 4,
+      "matches_saved_probabilities": true
+    },
+    {
+      "index": 49,
+      "model": "baseline",
+      "digit": 4,
+      "matches_saved_probabilities": true
+    },
+    {
+      "index": 90,
+      "model": "dino",
+      "digit": 9,
+      "matches_saved_probabilities": true
+    },
+    {
+      "index": 90,
+      "model": "baseline",
+      "digit": 9,
+      "matches_saved_probabilities": true
+    }
+  ]
+}

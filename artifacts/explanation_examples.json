@@ -1,0 +1,26 @@
+[
+  {
+    "test_index": 0,
+    "true": 0,
+    "predicted": 0,
+    "neighbors": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "test_index": 90,
+    "true": 9,
+    "predicted": 9,
+    "neighbors": [
+      9,
+      9,
+      9,
+      9,
+      9
+    ]
+  }
+]

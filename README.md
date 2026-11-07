@@ -12,7 +12,6 @@ classifier with and without two affine variants per training image.
 - `app.py` and `web/index.html`: local web app, drawing/upload → prediction → nearest training examples.
 - `digit_pipeline.py`: reproducible training and evaluation.
 - `make_figures.py`: figures generated from actual saved outputs.
-- `DEMO_GUIDE_RU.md`: 3–5 minute demo recording and defense guide.
 - `artifacts/metrics.json`, histories, prediction probabilities, manifest and environment: experiment evidence.
 
 The original A1 TensorFlow test results (90% baseline, 98% improved) are historical
@@ -20,39 +19,101 @@ reference values. New CNN results are **PyTorch reruns**, not the same fitted
 TensorFlow weights. Kernel initialization, data order and augmentation
 implementation differ. The A1 saved split is retained, not recreated.
 
-## Quick start on the author's computer
+## Start here: what to download
 
-Open `Run_Digit_Lab.cmd`, keep its terminal open, and open
-<http://127.0.0.1:7860> in Chrome. The local delivery includes the model weights
-and feature bank. No model API key is used.
+**To run the trained app without retraining, use `Assignment2_Ready_To_Run.zip`, the complete companion archive intended to accompany the Moodle submission.** Extract it and open the `Assignment2` folder containing `app.py`. The archive is separate from GitHub's **Code > Download ZIP**.
 
-## Reproduce on another computer
+The GitHub repository is the source/evidence distribution. It intentionally excludes the large pretrained backbone, cached training-image features and original dataset. A GitHub clone alone cannot run the full demo. If the companion archive has not been provided with the submission, request it from the author; there is no automatic download link configured in this repository.
 
-Python 3.12 is recommended. From the project folder:
+The complete archive includes:
+- application code and saved CNN/DINOv2 classifier weights;
+- `artifacts/dinov2_backbone/model.safetensors` and its configuration;
+- `artifacts/feature_bank.npz` for the nearest-neighbor gallery;
+- `artifacts/dataset.npz` for the prepared example buttons;
+- metrics, selection metadata, figures and the report;
+- `test_images/0` through `test_images/9`: ten additional MNIST PNGs per digit;
+- `dataset/split_dataset/{train,val,test}/{0,...,9}`: the original A1 split for optional reproduction.
 
-```sh
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux instead: source .venv/bin/activate
-python -m pip install -r requirements.txt
-python digit_pipeline.py --data "/path/to/ass comp vision"
-python make_figures.py
-python app.py
+No author's absolute filesystem paths are required. Python itself and installed libraries are not included.
+
+## Run the trained application (Windows PowerShell)
+
+Prerequisites: **64-bit Python 3.12**, internet for installing packages, and the extracted complete archive. A CPU is sufficient; no API key, GPU or training is required. These pinned dependencies were tested on Windows with Python 3.12; Python 3.14 is not supported by this setup.
+
+Open PowerShell in the extracted `Assignment2` folder (the folder containing `app.py`), then run:
+
+```powershell
+py -3.12 -m venv .venv312
+.\.venv312\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv312\Scripts\python.exe app.py
 ```
 
-The input folder must contain the existing A1 `split_dataset/train`, `val`, and
-`test` directories, each with class subdirectories `0` to `9`. Images must already
-be grayscale 28×28. Expected counts: 800/100/100, half own and half downloaded.
-Training writes only to `artifacts/`; the source images are not modified. The
-first run downloads `facebook/dinov2-small` from Hugging Face. Later app runs load
-the saved local backbone. A CPU is sufficient; CPU training/feature extraction
-can take several minutes. A compatible CUDA PyTorch installation can use a GPU.
+Alternatively, double-click `Run_Digit_Lab.cmd`; it performs the same setup and starts the server. Keep the terminal open and wait for `Running on http://127.0.0.1:7860`, then open <http://127.0.0.1:7860> in a browser. Stop the server with Ctrl+C.
 
-Public source control excludes the original dataset, cached image arrays,
-feature bank and large pretrained backbone. Use your A1 dataset to reproduce
-these, or use the complete local submission bundle supplied with the report.
-Do not substitute MNIST and claim the results correspond to the A1 dataset.
+For subsequent launches:
+
+```powershell
+.\.venv312\Scripts\python.exe app.py
+```
+
+Do not use a bare `py app.py` unless its interpreter has the required packages. Environment activation is not necessary for the explicit commands above. Model weights load from the archive, so after dependencies are installed, recognition does not require a model download.
+
+## macOS / Linux
+
+Use Python 3.12 in the complete archive's `Assignment2` folder:
+
+```sh
+python3.12 -m venv .venv312
+.venv312/bin/python -m pip install -r requirements.txt
+.venv312/bin/python app.py
+```
+
+Then open <http://127.0.0.1:7860>. The recorded experiment and application checks were performed on Windows; these other operating systems were not independently tested.
+
+## Test the application
+
+1. Click **Choose file** and upload a PNG from `test_images/0` to `test_images/9`. The folder name is the correct digit.
+2. Select DINOv2 or Baseline CNN and click **Recognize digit**.
+3. Inspect the predicted digit, ten class scores, inference time and five nearest training images.
+4. Select the other model and repeat with the same input.
+5. Click **Draw**, draw one large digit, then recognize it.
+
+Preparation is automatic: opaque grayscale 28-by-28 images with a dark border preserve their pixels; other images use thresholding, cropping, padding and resizing. No manual preparation selector is needed. Device/compute/browser information is shown in the footer.
+
+The additional MNIST examples are for demonstration, not the reported A1 test set. Their source indices and hashes are in `test_images/source.json`. They were not added to training. Exact pixel duplicates of the existing A1 splits were excluded, but writer independence is not established. Errors on new handwriting are possible; a high class score is not a guarantee. The nearest-neighbor gallery uses DINOv2 features even when CNN is selected.
+
+To run the supplied integration checks (complete archive required):
+
+```powershell
+.\.venv312\Scripts\python.exe test_app.py
+```
+
+The checks exercise both classifiers, compare six predictions with saved experiment probabilities, check the gallery and reject invalid/blank inputs. A successful run prints `"status": "passed"`.
+
+## Optional: reproduce training
+
+**Skip this section if you only want to demonstrate the saved application.** Save an untouched copy of the complete archive first: training replaces files in `artifacts/`.
+
+The complete archive includes the exact original split in `dataset/split_dataset`. With the environment installed, run from the project folder:
+
+```powershell
+.\.venv312\Scripts\python.exe digit_pipeline.py --data ".\dataset"
+.\.venv312\Scripts\python.exe make_figures.py
+.\.venv312\Scripts\python.exe app.py
+```
+
+If starting from a GitHub clone, first install the environment using the same commands above and obtain the original A1 data from the companion archive/author. Copy its `dataset` directory into the project or replace `.\dataset` with your own data-root path. The root must contain `split_dataset/train`, `split_dataset/val`, and `split_dataset/test`, each containing digit folders `0` through `9`. Expected counts are 800/100/100 grayscale 28-by-28 images, with the original file names and source split preserved. Do not substitute the 100 demonstration MNIST images and claim to reproduce the original benchmark.
+
+Without a local backbone, training downloads `facebook/dinov2-small` from Hugging Face. Feature extraction and training may take several minutes or longer on CPU. The seed is fixed, but exact metrics can vary with software/hardware. Training does not modify the source image files.
+
+## Troubleshooting
+
+- **Python 3.12 not found:** install 64-bit Python 3.12 with the Windows Python launcher, then reopen PowerShell.
+- **No module named flask/torch:** install requirements using the exact `.venv312` Python command above, then run with that same interpreter.
+- **No matching distribution for torch:** check `.\.venv312\Scripts\python.exe --version`; use Python 3.12, not 3.14.
+- **Missing feature_bank.npz, dataset.npz or backbone:** you likely downloaded only the GitHub source ZIP. Obtain the complete companion archive or reproduce training using the A1 data.
+- **Address already in use:** another copy may already be running; stop that copy with Ctrl+C, or open the existing app at the shown address.
+- **First prediction is slow:** the model loads on first use. Wait for it to finish before recording demo timings.
 
 ## Notebook in Colab
 
@@ -121,10 +182,3 @@ alternative-modern-method option. This project does not claim a new SOTA on
 handwritten digits, or that DINOv2 is the newest model available in 2026.
 
 
-## Interface update / Обновление интерфейса
-
-Image preparation is automatic; there is no manual preparation selector. Opaque grayscale 28×28 PNGs with a dark border preserve their pixels; photos and drawings are cropped and resized. The technical environment/privacy panel has been removed; experiment environment metadata remains in artifacts/environment.json.
-
-`test_images/0` through `test_images/9` contain ten MNIST test PNGs per digit for additional demonstrations. Source indices and hashes are in `test_images/source.json`. They were not added to training or the reported benchmark. Exact pixel duplicates of existing A1 splits were excluded; writer independence is not established. The observed MNIST 3→6 error is an example of imperfect transfer, not part of the original test accuracy.
-
-Для демонстрации: выбери PNG из test_images и нажми Recognize digit. Режим обработки выбирается автоматически. Ошибки на новых изображениях возможны.
